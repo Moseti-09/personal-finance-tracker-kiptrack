@@ -18,27 +18,34 @@ def dashboard(request):
 
     # Monthly summary
     monthly_summary = transactions.filter(
-        date__year=current_year, date__month=current_month
-    ).aggregate(
-        total_income=Coalesce(
-            Sum(Case(When(transaction_type='income', then='amount'), output_field=DecimalField())),
-            Value(0)
+    date__year=current_year,
+    date__month=current_month
+).aggregate(
+    total_income=Coalesce(
+        Sum(
+            Case(
+                When(transaction_type='income', then='amount'),
+                default=Value(0),
+                output_field=DecimalField(max_digits=12, decimal_places=2)
+            ),
+            output_field=DecimalField(max_digits=12, decimal_places=2)
         ),
-        total_expense=Coalesce(
-            Sum(Case(When(transaction_type='expense', then='amount'), output_field=DecimalField())),
-            Value(0)
+        Value(0),
+        output_field=DecimalField(max_digits=12, decimal_places=2)
+    ),
+    total_expense=Coalesce(
+        Sum(
+            Case(
+                When(transaction_type='expense', then='amount'),
+                default=Value(0),
+                output_field=DecimalField(max_digits=12, decimal_places=2)
+            ),
+            output_field=DecimalField(max_digits=12, decimal_places=2)
         ),
-    )
-
-    balance = monthly_summary['total_income'] - monthly_summary['total_expense']
-
-    context = {
-        'monthly_income': monthly_summary['total_income'],
-        'monthly_expense': monthly_summary['total_expense'],
-        'balance': balance,
-        'recent_transactions': transactions[:5],
-    }
-    return render(request, 'dashboard.html', context)
+        Value(0),
+        output_field=DecimalField(max_digits=12, decimal_places=2)
+    ),
+)
 
 
 @login_required
