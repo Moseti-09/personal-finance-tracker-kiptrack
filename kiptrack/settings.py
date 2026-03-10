@@ -27,6 +27,7 @@ LOGIN_REDIRECT_URL = 'dashboard'       # after login go here
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
+ROOT_URLCONF = 'kiptrack.urls'
 # If not already present
 TEMPLATES = [
     {
