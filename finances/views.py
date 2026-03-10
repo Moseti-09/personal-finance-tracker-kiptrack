@@ -76,3 +76,62 @@ def transaction_list(request):
             messages.success(request, 'Transaction added!')
             return redirect('transaction_list')
     return render(request, 'transaction_list.html', {'transactions': transactions, 'form': form})
+
+
+@login_required
+def dashboard(request):
+    today = datetime.today()
+    current_month = today.month
+    current_year = today.year
+
+    transactions = Transaction.objects.filter(user=request.user)
+
+    monthly_summary = transactions.filter(
+        date__year=current_year,
+        date__month=current_month
+    ).aggregate(
+        total_income=Coalesce(
+            Sum(
+                Case(
+                    When(transaction_type='income', then='amount'),
+                    default=Value(0),
+                    output_field=DecimalField(max_digits=12, decimal_places=2)
+                ),
+                output_field=DecimalField(max_digits=12, decimal_places=2)
+            ),
+            Value(0),
+            output_field=DecimalField(max_digits=12, decimal_places=2)
+        ),
+        total_expense=Coalesce(
+            Sum(
+                Case(
+                    When(transaction_type='expense', then='amount'),
+                    default=Value(0),
+                    output_field=DecimalField(max_digits=12, decimal_places=2)
+                ),
+                output_field=DecimalField(max_digits=12, decimal_places=2)
+            ),
+            Value(0),
+            output_field=DecimalField(max_digits=12, decimal_places=2)
+        ),
+    )
+
+    balance = monthly_summary['total_income'] - monthly_summary['total_expense']
+
+    context = {
+        'monthly_income': monthly_summary['total_income'],
+        'monthly_expense': monthly_summary['total_expense'],
+        'balance': balance,
+        'recent_transactions': transactions[:5],
+    }
+    # ← The problem: missing return here!
+        # ... all the code above ...
+
+    context = {
+        'monthly_income': monthly_summary['total_income'],
+        'monthly_expense': monthly_summary['total_expense'],
+        'balance': balance,
+        'recent_transactions': transactions[:5],
+    }
+
+    return render(request, 'dashboard.html', context)   # ← Add this line!    
