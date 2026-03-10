@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}transaction{% endblock %}
+
+{% block content %}
+<h2>My Transaction</h2>
+
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Add Transaction</button>
+</form>
+
+{% if transaction %}
+    <ul class="list-group">
+        {% for cat in transaction %}
+            <li class="list-group-item">
+                <strong>{{ cat.name }}</strong> ({{ cat.type }})
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No transaction yet. Add one above.</p>
+{% endif %}
+{% endblock %}

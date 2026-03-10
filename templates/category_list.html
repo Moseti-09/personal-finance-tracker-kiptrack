@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+<h2>My Categories</h2>
+
+<form method="post" class="mb-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Add Category</button>
+</form>
+
+{% if categories %}
+    <ul class="list-group">
+        {% for cat in categories %}
+            <li class="list-group-item">
+                <strong>{{ cat.name }}</strong> ({{ cat.type }})
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No categories yet. Add one above.</p>
+{% endif %}
+{% endblock %}
